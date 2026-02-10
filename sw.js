@@ -1,4 +1,4 @@
-const CACHE_NAME = 'vaulta-v1';
+const CACHE_NAME = 'vaulta-v2'; // Changé v1 -> v2
 const ASSETS = [
   './',
   './index.html',
