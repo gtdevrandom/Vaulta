@@ -16,6 +16,31 @@ const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
 let userKey = null; // Stockée uniquement en mémoire vive
+// Ajout gestion formulaire
+document.getElementById('add-form').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const site = document.getElementById('site-input').value;
+    const identifiant = document.getElementById('id-input').value;
+    const motdepasse = document.getElementById('pass-input').value;
+    if (!userKey) {
+        alert('Veuillez déverrouiller avec le mot de passe maître');
+        return;
+    }
+    try {
+        // Chiffrement
+        const encrypted = await encryptData(motdepasse, userKey);
+        await addDoc(collection(db, "passwords"), {
+            site,
+            identifiant,
+            password: encrypted.cipher,
+            iv: encrypted.iv
+        });
+        document.getElementById('add-form').reset();
+        loadPasswords();
+    } catch (err) {
+        alert('Erreur lors de l\'ajout');
+    }
+});
 
 document.getElementById('unlock-btn').addEventListener('click', async () => {
     const masterPass = document.getElementById('master-password').value;
@@ -38,10 +63,25 @@ async function loadPasswords() {
 
     querySnapshot.forEach(async (doc) => {
         const data = doc.data();
-        // On déchiffre ici
         const clearPass = await decryptData(data.password, data.iv, userKey);
         list.innerHTML += `<div class="card">
-            <strong>${data.site}</strong>: ${clearPass}
+            <div>
+                <strong>${data.site}</strong><br>
+                <span>${data.identifiant}</span><br>
+                <span>${clearPass}</span>
+            </div>
+            <button class="delete-btn" onclick="deletePassword('${doc.id}')">Supprimer</button>
         </div>`;
     });
+}
+
+// Suppression
+window.deletePassword = async function(id) {
+    try {
+        await deleteDoc(doc(db, "passwords", id));
+        loadPasswords();
+    } catch (err) {
+        alert('Erreur lors de la suppression');
+    }
+}
 }

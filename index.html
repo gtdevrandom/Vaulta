@@ -18,11 +18,15 @@
 
         <div id="dashboard" style="display:none;">
             <div class="actions">
-                <button id="add-btn">+ Ajouter</button>
                 <button id="logout-btn">Quitter</button>
             </div>
-            <div id="password-list">
-                </div>
+            <form id="add-form">
+                <input type="text" id="site-input" placeholder="Site" required>
+                <input type="text" id="id-input" placeholder="Identifiant" required>
+                <input type="password" id="pass-input" placeholder="Mot de passe" required>
+                <button type="submit">Ajouter</button>
+            </form>
+            <div id="password-list"></div>
         </div>
     </div>
 
