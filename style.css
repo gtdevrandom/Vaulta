@@ -7,49 +7,22 @@
 }
 
 body {
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    font-family: sans-serif;
     background-color: var(--bg);
     color: var(--text);
     margin: 0;
+    padding: 20px;
     display: flex;
     justify-content: center;
-    padding: 20px;
-    min-height: 100vh;
-    box-sizing: border-box;
 }
 
-@media (max-width: 600px) {
-    #app {
-        max-width: 100%;
-        padding: 0 5px;
-    }
-    .card, #add-form {
-        padding: 10px;
-        margin-top: 10px;
-        border-radius: 8px;
-    }
-    input, button {
-        padding: 10px;
-        font-size: 16px;
-    }
-    h1 {
-        font-size: 1.2em;
-    }
-}
-}
-
-#app {
-    width: 100%;
-    max-width: 500px;
-}
-
-h1 { text-align: center; color: var(--primary); }
+#app { width: 100%; max-width: 450px; }
 
 input {
     width: 100%;
     padding: 12px;
-    margin: 10px 0;
-    border-radius: 8px;
+    margin: 8px 0;
+    border-radius: 6px;
     border: 1px solid #334155;
     background: #1e293b;
     color: white;
@@ -59,10 +32,10 @@ input {
 button {
     width: 100%;
     padding: 12px;
-    border-radius: 8px;
+    border-radius: 6px;
     border: none;
     background: var(--primary);
-    color: var(--bg);
+    color: #0f172a;
     font-weight: bold;
     cursor: pointer;
 }
@@ -70,23 +43,18 @@ button {
 .card {
     background: var(--card);
     padding: 15px;
-    border-radius: 12px;
-    margin-top: 15px;
+    border-radius: 10px;
+    margin-top: 10px;
     display: flex;
     justify-content: space-between;
     align-items: center;
-    border: 1px solid #334155;
 }
 
-.delete-btn {
-    background: var(--danger);
-    width: auto;
-    padding: 5px 10px;
-}
+.delete-btn { width: auto; background: var(--danger); color: white; padding: 5px 10px; }
 
 #add-form {
-    background: var(--card);
+    border: 1px solid var(--primary);
     padding: 15px;
-    border-radius: 12px;
-    margin-bottom: 20px;
+    border-radius: 10px;
+    margin-bottom: 30px;
 }
