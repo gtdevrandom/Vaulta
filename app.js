@@ -1,3 +1,5 @@
+import { deriveKey, encryptData, decryptData } from './crypto.js';
+
 // --- UTILITAIRE INDEXEDDB ---
 // Permet de sauvegarder le mot de passe maître de façon persistante
 async function saveToPermanentStorage(key, value) {
