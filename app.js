@@ -3,9 +3,13 @@ import { getFirestore, collection, addDoc, getDocs, query, where } from "https:/
 import { deriveKey, encryptData, decryptData } from "./crypto.js";
 
 const firebaseConfig = {
-    apiKey: "TON_API_KEY",
-    projectId: "TON_PROJECT_ID",
-    // ... remplis le reste
+  apiKey: "AIzaSyC237bcE2N-mf0-1PYVvF8Mhy1kYM5hvzs",
+  authDomain: "vaulta-a5c5b.firebaseapp.com",
+  projectId: "vaulta-a5c5b",
+  storageBucket: "vaulta-a5c5b.firebasestorage.app",
+  messagingSenderId: "727567661466",
+  appId: "1:727567661466:web:b8f6b8628e2764796ea223",
+  measurementId: "G-EEGJJ5C602"
 };
 
 const app = initializeApp(firebaseConfig);
