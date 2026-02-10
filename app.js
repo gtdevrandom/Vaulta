@@ -1,8 +1,8 @@
 import { deriveKey, encryptData, decryptData } from './crypto.js';
 
-let userKey = null; // La clé dérivée reste en mémoire vive (RAM) uniquement
+let userKey = null;
 
-// --- 1. UTILITAIRES INDEXEDDB (Pour stocker le Master Pass chiffré par l'OS) ---
+// --- 1. UTILITAIRES INDEXEDDB ---
 function openDB() {
     return new Promise((resolve, reject) => {
         const request = indexedDB.open("VaultaDB", 1);
@@ -27,36 +27,23 @@ async function getFromPermanentStorage(key) {
     });
 }
 
-async function clearPermanentStorage() {
-    const db = await openDB();
-    const tx = db.transaction("settings", "readwrite");
-    tx.objectStore("settings").clear();
-    return new Promise((resolve) => tx.oncomplete = resolve);
-}
-
 // --- 2. LOGIQUE DE DÉVERROUILLAGE ---
 document.getElementById('unlock-btn').addEventListener('click', async () => {
     const masterPass = document.getElementById('master-password').value;
     if(!masterPass) return alert("Entrez votre mot de passe maître");
 
-    // NOTE : Pour une vraie prod, le sel doit être unique par utilisateur et stocké.
-    // Ici on garde un sel fixe pour simplifier la démo.
     const salt = new TextEncoder().encode("salt-fixe-v1-vaulta-app"); 
     
     try {
-        // Dérivation de la clé (PBKDF2)
         userKey = await deriveKey(masterPass, salt);
         
-        // Transition UI
         document.getElementById('login-section').style.display = 'none';
         document.getElementById('dashboard').style.display = 'block';
         
-        // Chargement des données
         loadPasswords();
         
-        // Vérifier si la biométrie est déjà active pour cacher/afficher le bouton "Activer"
         const bioEnabled = localStorage.getItem('bio_enabled');
-        if (bioEnabled) {
+        if (bioEnabled === 'true') {
              document.getElementById('enable-bio-btn').style.display = 'none';
         }
 
@@ -66,9 +53,7 @@ document.getElementById('unlock-btn').addEventListener('click', async () => {
     }
 });
 
-// --- 3. GESTION DES MOTS DE PASSE (AJOUT & AFFICHAGE) ---
-
-// Sauvegarder un nouveau mot de passe
+// --- 3. GESTION DES MOTS DE PASSE ---
 document.getElementById('add-form').addEventListener('submit', async (e) => {
     e.preventDefault();
     if (!userKey) return alert("Session expirée. Veuillez recharger.");
@@ -81,22 +66,18 @@ document.getElementById('add-form').addEventListener('submit', async (e) => {
     const jsonStr = JSON.stringify(dataObj);
 
     try {
-        // Chiffrement AES-GCM
         const encrypted = await encryptData(jsonStr, userKey);
-        
-        // Sauvegarde dans localStorage
         const vault = JSON.parse(localStorage.getItem('vault_data') || '[]');
         vault.push(encrypted);
         localStorage.setItem('vault_data', JSON.stringify(vault));
 
         e.target.reset();
-        loadPasswords(); // Rafraîchir la liste
+        loadPasswords();
     } catch (err) {
         alert("Erreur de chiffrement : " + err.message);
     }
 });
 
-// Charger et déchiffrer la liste
 async function loadPasswords() {
     const listContainer = document.getElementById('password-list');
     listContainer.innerHTML = '';
@@ -108,7 +89,6 @@ async function loadPasswords() {
         return;
     }
 
-    // On boucle sur chaque élément chiffré
     for (let i = 0; i < vault.length; i++) {
         const item = vault[i];
         try {
@@ -128,13 +108,11 @@ async function loadPasswords() {
                 </div>
             `;
             
-            // Bouton Copier
             card.querySelector('.copy-btn').addEventListener('click', () => {
                 navigator.clipboard.writeText(entry.password);
                 alert('Mot de passe copié !');
             });
 
-            // Bouton Supprimer
             card.querySelector('.del-btn').addEventListener('click', () => {
                 if(confirm('Supprimer cet identifiant ?')) {
                     deleteEntry(i);
@@ -144,10 +122,6 @@ async function loadPasswords() {
             listContainer.appendChild(card);
         } catch (err) {
             console.error("Échec déchiffrement index " + i, err);
-            const errDiv = document.createElement('div');
-            errDiv.className = 'card';
-            errDiv.innerText = "Donnée corrompue ou mauvaise clé.";
-            listContainer.appendChild(errDiv);
         }
     }
 }
@@ -159,9 +133,7 @@ function deleteEntry(index) {
     loadPasswords();
 }
 
-// --- 4. BIOMÉTRIE (WebAuthn) ---
-
-// Initialisation au chargement : vérifie si biométrie active
+// --- 4. BIOMÉTRIE (WebAuthn) - Version Corrigée ---
 window.addEventListener('load', async () => {
     const bioEnabled = localStorage.getItem('bio_enabled');
     if (bioEnabled === 'true') {
@@ -169,30 +141,36 @@ window.addEventListener('load', async () => {
     }
 });
 
-// A. Activer la biométrie (depuis le Dashboard)
 document.getElementById('enable-bio-btn').addEventListener('click', async () => {
     const masterPass = document.getElementById('master-password').value;
     
-    // Sécurité : On a besoin du mot de passe maître pour l'enregistrer
     if(!masterPass) {
-        return alert("Erreur : Mot de passe maître introuvable en mémoire. Reconnectez-vous manuellement.");
+        return alert("Veuillez d'abord vous connecter avec votre mot de passe.");
     }
 
     try {
-        // Création des options WebAuthn
         const challenge = window.crypto.getRandomValues(new Uint8Array(32));
+        const userId = window.crypto.getRandomValues(new Uint8Array(16));
+
         const publicKey = {
             challenge: challenge,
-            rp: { name: "Vaulta App" },
+            rp: { 
+                name: "Vaulta App",
+                id: window.location.hostname 
+            },
             user: {
-                id: window.crypto.getRandomValues(new Uint8Array(16)),
+                id: userId,
                 name: "user@vaulta",
                 displayName: "Utilisateur Vaulta"
             },
-            pubKeyCredParams: [{ alg: -7, type: "public-key" }, { alg: -257, type: "public-key" }],
+            pubKeyCredParams: [
+                { alg: -7, type: "public-key" },
+                { alg: -257, type: "public-key" }
+            ],
             authenticatorSelection: { 
-                authenticatorAttachment: "platform", // FaceID / TouchID
-                userVerification: "required"
+                authenticatorAttachment: "platform", 
+                userVerification: "preferred", // Plus compatible sur Android
+                residentKey: "preferred"
             },
             timeout: 60000
         };
@@ -200,56 +178,44 @@ document.getElementById('enable-bio-btn').addEventListener('click', async () => 
         const credential = await navigator.credentials.create({ publicKey });
 
         if (credential) {
-            // Si l'OS valide l'empreinte, on stocke le mot de passe maître dans IndexedDB
             await saveToPermanentStorage('master_vault', masterPass);
             localStorage.setItem('bio_enabled', 'true');
-            
             alert("Biométrie activée !");
             document.getElementById('enable-bio-btn').style.display = 'none';
         }
     } catch (e) {
         console.error(e);
-        alert("Impossible d'activer la biométrie : " + e.message);
+        alert("Erreur biométrie : " + e.message);
     }
 });
 
-// B. Se connecter avec biométrie (depuis l'écran de Login)
 document.getElementById('biometric-login-btn').addEventListener('click', async () => {
     try {
-        // On demande à l'OS de vérifier l'utilisateur
         const challenge = window.crypto.getRandomValues(new Uint8Array(32));
         const assertion = await navigator.credentials.get({
             publicKey: { 
                 challenge: challenge,
-                userVerification: "required"
+                userVerification: "preferred" 
             }
         });
 
         if (assertion) {
-            // Si succès, on récupère le mot de passe maître stocké
             const savedPass = await getFromPermanentStorage('master_vault');
             if (savedPass) {
                 document.getElementById('master-password').value = savedPass;
-                document.getElementById('unlock-btn').click(); // On simule le clic
+                document.getElementById('unlock-btn').click();
             } else {
-                alert("Erreur : Mot de passe non trouvé. Reconnectez-vous avec le mot de passe.");
+                alert("Données biométriques introuvables.");
             }
         }
     } catch (e) {
         console.error(e);
-        alert("Authentification biométrique annulée ou échouée.");
+        alert("Authentification échouée.");
     }
 });
 
 // --- 5. DÉCONNEXION ---
-document.getElementById('logout-btn').addEventListener('click', async () => {
-    // Nettoyage complet de la mémoire vive
+document.getElementById('logout-btn').addEventListener('click', () => {
     userKey = null;
-    document.getElementById('master-password').value = "";
-    
-    // (Optionnel) Si vous voulez désactiver la biométrie à la déconnexion, décommentez :
-    // await clearPermanentStorage(); 
-    // localStorage.removeItem('bio_enabled');
-
-    location.reload(); // Recharge la page pour tout remettre à zéro
+    location.reload();
 });
