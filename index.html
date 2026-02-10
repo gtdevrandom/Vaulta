@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mon Coffre-Fort</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="manifest" href="manifest.json">
+</head>
+<body>
+    <div id="app">
+        <h1>🔐 Mon Pass Manager</h1>
+        
+        <div id="login-section">
+            <input type="password" id="master-password" placeholder="Mot de passe maître">
+            <button id="unlock-btn">Déverrouiller</button>
+        </div>
+
+        <div id="dashboard" style="display:none;">
+            <div class="actions">
+                <button id="add-btn">+ Ajouter</button>
+                <button id="logout-btn">Quitter</button>
+            </div>
+            <div id="password-list">
+                </div>
+        </div>
+    </div>
+
+    <script type="module" src="app.js"></script>
+</body>
+</html>
