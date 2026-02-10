@@ -20,12 +20,13 @@
             <input type="password" id="master-password" placeholder="Mot de passe maître">
             <button id="unlock-btn">Déverrouiller</button>
             <hr>
-            <button id="biometric-btn" style="background: #10b981; display: none;">Utiliser l'empreinte</button>
+            <button id="biometric-login-btn" style="background: #10b981; display: none;">Connexion par Empreinte</button>
         </div>
 
         <div id="dashboard" style="display:none;">
-            <div class="actions">
-                <button id="logout-btn" style="background: var(--danger); margin-bottom: 20px;">Quitter le coffre</button>
+            <div class="actions" style="display: flex; gap: 10px; margin-bottom: 20px;">
+                <button id="enable-bio-btn" style="background: #10b981;">Activer l'empreinte</button>
+                <button id="logout-btn" style="background: var(--danger);">Quitter</button>
             </div>
             
             <form id="add-form">
@@ -33,13 +34,22 @@
                 <input type="text" id="site-input" placeholder="Site (ex: Google)" required>
                 <input type="text" id="id-input" placeholder="Identifiant / Email" required>
                 <input type="password" id="pass-input" placeholder="Mot de passe" required>
-                <button type="submit">Enregistrer</button>
+                <button type="submit">Enregistrer + Chiffrer</button>
             </form>
 
+            <h3>Mes Mots de Passe</h3>
             <div id="password-list"></div>
         </div>
     </div>
 
     <script type="module" src="app.js"></script>
+    
+    <script>
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('./sw.js')
+                .then(() => console.log('Service Worker enregistré'))
+                .catch(err => console.error('Erreur SW:', err));
+        }
+    </script>
 </body>
 </html>
