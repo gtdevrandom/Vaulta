@@ -1,60 +1,147 @@
 :root {
     --bg: #0f172a;
-    --card: #1e293b;
+    --card: rgba(30, 41, 59, 0.7);
     --primary: #38bdf8;
-    --text: #f8fafc;
+    --primary-hover: #0ea5e9;
+    --text: #f1f5f9;
+    --text-dim: #94a3b8;
     --danger: #ef4444;
+    --success: #10b981;
+    --radius: 12px;
 }
 
 body {
-    font-family: sans-serif;
-    background-color: var(--bg);
+    font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+    background: radial-gradient(circle at top, #1e293b, #0f172a);
     color: var(--text);
     margin: 0;
-    padding: 20px;
+    padding: 15px;
     display: flex;
     justify-content: center;
+    min-height: 100vh;
+    -webkit-tap-highlight-color: transparent;
 }
 
-#app { width: 100%; max-width: 450px; }
+#app { 
+    width: 100%; 
+    max-width: 480px; 
+    margin-top: 10px;
+}
 
+h1 {
+    text-align: center;
+    font-size: 2.2rem;
+    margin-bottom: 30px;
+    letter-spacing: -1px;
+}
+
+/* --- FORMULAIRES & INPUTS --- */
 input {
     width: 100%;
-    padding: 12px;
-    margin: 8px 0;
-    border-radius: 6px;
+    padding: 14px;
+    margin: 10px 0;
+    border-radius: var(--radius);
     border: 1px solid #334155;
-    background: #1e293b;
+    background: rgba(15, 23, 42, 0.6);
     color: white;
     box-sizing: border-box;
+    font-size: 16px; /* Empêche le zoom auto sur iPhone/Android */
+    transition: border-color 0.2s;
 }
 
+input:focus {
+    outline: none;
+    border-color: var(--primary);
+    background: rgba(15, 23, 42, 0.8);
+}
+
+/* --- BOUTONS --- */
 button {
     width: 100%;
-    padding: 12px;
-    border-radius: 6px;
+    padding: 16px;
+    border-radius: var(--radius);
     border: none;
     background: var(--primary);
     color: #0f172a;
-    font-weight: bold;
+    font-weight: 700;
+    font-size: 1rem;
     cursor: pointer;
+    transition: transform 0.1s, opacity 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
 }
 
+button:active {
+    transform: scale(0.98);
+    opacity: 0.9;
+}
+
+#biometric-login-btn, #enable-bio-btn {
+    background: var(--success);
+    color: white;
+}
+
+#logout-btn {
+    background: rgba(239, 68, 68, 0.15);
+    color: var(--danger);
+    border: 1px solid var(--danger);
+}
+
+/* --- DASHBOARD & CARTES --- */
 .card {
     background: var(--card);
-    padding: 15px;
-    border-radius: 10px;
-    margin-top: 10px;
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    padding: 18px;
+    border-radius: var(--radius);
+    margin-top: 12px;
     display: flex;
     justify-content: space-between;
     align-items: center;
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
 }
 
-.delete-btn { width: auto; background: var(--danger); color: white; padding: 5px 10px; }
+.card strong {
+    color: var(--primary);
+    display: block;
+    margin-bottom: 4px;
+}
+
+.card span {
+    color: var(--text-dim);
+    font-family: monospace;
+}
 
 #add-form {
-    border: 1px solid var(--primary);
-    padding: 15px;
-    border-radius: 10px;
-    margin-bottom: 30px;
+    background: rgba(56, 189, 248, 0.05);
+    border: 1px dashed var(--primary);
+    padding: 20px;
+    border-radius: var(--radius);
+    margin-bottom: 40px;
+}
+
+#add-form h3 {
+    margin-top: 0;
+    color: var(--primary);
+}
+
+/* --- UTILITAIRES --- */
+hr {
+    border: 0;
+    border-top: 1px solid #334155;
+    margin: 25px 0;
+}
+
+.actions {
+    margin-bottom: 25px;
+}
+
+.copy-btn, .del-btn {
+    width: 45px !important;
+    height: 45px !important;
+    padding: 0 !important;
+    border-radius: 10px !important;
 }
